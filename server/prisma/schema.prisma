@@ -1,0 +1,99 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/prisma/generated"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum ProposalStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+enum AuthType {
+  NONE
+  API_KEY
+  OAUTH
+}
+
+model User {
+  id String @id @default(uuid(4))
+
+  email        String @unique
+  passwordHash String
+  username     String
+
+  role              UserRole @default(USER)
+  isEmailVerified   Boolean  @default(false)
+  verificationToken String?
+
+  proposals Proposal[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Category {
+  id String @id @default(uuid())
+
+  name        String  @unique
+  description String?
+
+  apiEntries Api[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Api {
+  id String @id @default(uuid())
+
+  name        String
+  description String
+  url         String
+
+  isHttps  Boolean
+  isCors   Boolean
+  isFree   Boolean
+  authType AuthType
+
+  isActive Boolean @default(true)
+
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Proposal {
+  id String @id @default(uuid())
+
+  name        String
+  description String
+  url         String
+
+  categoryId String
+
+  isHttps  Boolean
+  isCors   Boolean
+  isFree   Boolean
+  authType AuthType
+
+  adminNote String?
+  status    ProposalStatus @default(PENDING)
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
