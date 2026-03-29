@@ -26,3 +26,5 @@ export function handleError(
         ...(CONFIG.nodeEnv === "dev" && {stack: err.stack}),
     });
 }
+
+export default handleError;

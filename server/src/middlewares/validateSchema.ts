@@ -14,7 +14,7 @@ export function requestSchema(schema: {
     });
 }
 
-export function validate(schema: ZodObject<ZodRawShape>) {
+export function validateSchema(schema: ZodObject<ZodRawShape>) {
     return (req: Request, _res: Response, next: NextFunction): void => {
         const result = schema.safeParse({
             body: req.body,
@@ -42,3 +42,5 @@ export function validate(schema: ZodObject<ZodRawShape>) {
         next();
     };
 }
+
+export default validateSchema;

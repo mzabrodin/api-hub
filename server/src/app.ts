@@ -1,7 +1,7 @@
 import express from "express";
 import cors from "cors";
 import {Request, Response} from "express";
-import {handleError} from "./middlewares/handleError.js";
+import handleError from "./middlewares/handleError.js";
 import routeNotFound from "./middlewares/routeNotFound.js";
 import CONFIG from "./config.js";
 
