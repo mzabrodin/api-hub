@@ -37,9 +37,11 @@ model User {
   passwordHash String
   username     String
 
-  role              UserRole @default(USER)
-  isEmailVerified   Boolean  @default(false)
-  verificationToken String?
+  role               UserRole @default(USER)
+  isEmailVerified    Boolean  @default(false)
+  verificationToken  String?
+  passwordResetToken String?
+  refreshToken       String?
 
   proposals Proposal[]
 
@@ -66,10 +68,10 @@ model Api {
   description String
   url         String
 
-  isHttps  Boolean
+  isHttps    Boolean
   corsStatus CorsStatus @default(UNKNOWN)
-  isFree   Boolean
-  authType AuthType
+  isFree     Boolean
+  authType   AuthType
 
   isActive Boolean @default(true)
 
@@ -89,10 +91,10 @@ model Proposal {
 
   categoryId String
 
-  isHttps  Boolean
+  isHttps    Boolean
   corsStatus CorsStatus @default(UNKNOWN)
-  isFree   Boolean
-  authType AuthType
+  isFree     Boolean
+  authType   AuthType
 
   adminNote String?
   status    ProposalStatus @default(PENDING)
