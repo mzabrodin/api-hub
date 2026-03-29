@@ -29,7 +29,7 @@ const CONFIG = {
     clientUrl: getEnvironmentString("CLIENT_URL"),
 
     jwtSecret: getEnvironmentString("JWT_ACCESS_SECRET"),
-    jwtExpiresIn: getEnvironmentString("JWT_ACCESS_EXPIRES_IN", "15m"),
+    jwtAccessExpiresIn: getEnvironmentString("JWT_ACCESS_EXPIRES_IN", "15m"),
 
     jwtRefreshSecret: getEnvironmentString("JWT_REFRESH_SECRET"),
     jwtRefreshExpiresIn: getEnvironmentString("JWT_REFRESH_EXPIRES_IN", "7d"),
