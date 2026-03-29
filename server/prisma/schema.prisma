@@ -24,6 +24,12 @@ enum AuthType {
   OAUTH
 }
 
+enum CorsStatus {
+  AVAILABLE
+  UNAVAILABLE
+  UNKNOWN
+}
+
 model User {
   id String @id @default(uuid(4))
 
@@ -61,7 +67,7 @@ model Api {
   url         String
 
   isHttps  Boolean
-  isCors   Boolean
+  corsStatus CorsStatus @default(UNKNOWN)
   isFree   Boolean
   authType AuthType
 
@@ -84,7 +90,7 @@ model Proposal {
   categoryId String
 
   isHttps  Boolean
-  isCors   Boolean
+  corsStatus CorsStatus @default(UNKNOWN)
   isFree   Boolean
   authType AuthType
 
