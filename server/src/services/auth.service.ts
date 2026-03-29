@@ -4,7 +4,7 @@ import CONFIG from "../config.js";
 import type JWT from "../types/jwt.js";
 import type {RegisterRequest, LoginRequest} from "../schemas/auth.schemas.js";
 import type {ChangePasswordRequest} from "../schemas/user.schemas.js";
-import {sendVerificationEmail, sendPasswordResetEmail} from "./email.services.js";
+import {sendVerificationEmail, sendPasswordResetEmail} from "./email.service.js";
 import {
     BadRequestError,
     ResourceAlreadyExistsError,
