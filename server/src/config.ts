@@ -34,6 +34,9 @@ const CONFIG = {
     jwtRefreshSecret: getEnvironmentString("JWT_REFRESH_SECRET"),
     jwtRefreshExpiresIn: getEnvironmentString("JWT_REFRESH_EXPIRES_IN", "7d"),
 
+    jwtVerifyEmailExpiresIn: getEnvironmentString("JWT_VERIFY_EMAIL_EXPIRES_IN", "24h"),
+    jwtResetPasswordExpiresIn: getEnvironmentString("JWT_RESET_PASSWORD_EXPIRES_IN", "1h"),
+
     emailHost: getEnvironmentString("EMAIL_HOST"),
     emailPort: getEnvironmentNumber("EMAIL_PORT", "587"),
     emailUser: getEnvironmentString("EMAIL_USER"),
