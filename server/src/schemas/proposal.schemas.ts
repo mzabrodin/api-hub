@@ -1,5 +1,5 @@
 import {z} from "zod";
-import {apiEntryBaseSchema, ProposalStatus} from "./common.schemas.js";
+import {apiEntryBaseSchema, ProposalStatus, paginationSchema} from "./common.schemas.js";
 
 export const createProposalSchema = apiEntryBaseSchema;
 export const updateProposalSchema = apiEntryBaseSchema.partial();
@@ -15,6 +15,11 @@ export const reviewProposalSchema = z.object({
     {error: "Admin note is required when rejecting a proposal", path: ["adminNote"]},
 );
 
+export const proposalQuerySchema = paginationSchema.extend({
+    status: ProposalStatus.optional(),
+});
+
 export type CreateProposalRequest = z.infer<typeof createProposalSchema>;
 export type UpdateProposalRequest = z.infer<typeof updateProposalSchema>;
 export type ReviewProposalRequest = z.infer<typeof reviewProposalSchema>;
+export type ProposalQueryRequest = z.infer<typeof proposalQuerySchema>;
