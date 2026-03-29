@@ -2,26 +2,27 @@ import {Request, Response, NextFunction} from "express";
 import CONFIG from "../config.js";
 import {AppError, ValidationError} from "../utils/errors/AppError.js";
 
-export const handleError = (
+export function handleError(
     err: Error,
     _req: Request,
     res: Response,
     _next: NextFunction
-) => {
+): void {
     if (err instanceof AppError) {
-        return res.status(err.statusCode).json({
+        res.status(err.statusCode).json({
             status: "error",
             message: err.message,
-            ...(err instanceof ValidationError && { details: err.details }),
-            ...(CONFIG.nodeEnv === "dev" && { stack: err.stack }),
+            ...(err instanceof ValidationError && {details: err.details}),
+            ...(CONFIG.nodeEnv === "dev" && {stack: err.stack}),
         });
+        return;
     }
 
     console.error("Unexpected error: ", err);
 
-    return res.status(500).json({
+    res.status(500).json({
         status: "error",
         message: "Something went wrong",
         ...(CONFIG.nodeEnv === "dev" && {stack: err.stack}),
     });
-};
+}
