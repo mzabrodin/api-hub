@@ -18,8 +18,12 @@ export const ProposalStatus = z.enum(["PENDING", "ACCEPTED", "REJECTED"], {
     error: "Proposal status must be one of PENDING, ACCEPTED, REJECTED",
 });
 
-export const AuthType = z.enum(["NONE", "API_KEY", "OAUTH"],{
+export const AuthType = z.enum(["NONE", "API_KEY", "OAUTH"], {
     error: "Auth type must be one of NONE, API_KEY, OAUTH",
+});
+
+export const CorsStatus = z.enum(["AVAILABLE", "UNAVAILABLE", "UNKNOWN"], {
+    error: "CORS status must be one of AVAILABLE, UNAVAILABLE, UNKNOWN",
 });
 
 export const passwordSchema = z
@@ -51,7 +55,7 @@ export const apiEntryBaseSchema = z.object({
     url: z.url({error: "Must be a valid URL"}),
     categoryId: z.uuid({error: "Invalid category ID"}),
     isHttps: z.boolean(),
-    isCors: z.boolean(),
+    corsStatus: CorsStatus,
     isFree: z.boolean(),
     authType: AuthType,
 });

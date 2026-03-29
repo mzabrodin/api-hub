@@ -1,5 +1,5 @@
 import {z} from "zod";
-import {apiEntryBaseSchema, AuthType, paginationSchema, processBoolean} from "./common.schemas.js";
+import {apiEntryBaseSchema, AuthType, CorsStatus, paginationSchema, processBoolean} from "./common.schemas.js";
 
 export const createApiSchema = apiEntryBaseSchema;
 export const updateApiSchema = apiEntryBaseSchema.partial();
@@ -10,7 +10,7 @@ export const apiQuerySchema = paginationSchema.extend({
     categoryId: z.uuid({error: "Invalid category ID"}).optional(),
     authType: AuthType.optional(),
     isHttps: z.preprocess(processBoolean, z.boolean()).optional(),
-    isCors: z.preprocess(processBoolean, z.boolean()).optional(),
+    corsStatus: CorsStatus.optional(),
     isFree: z.preprocess(processBoolean, z.boolean()).optional(),
 });
 
