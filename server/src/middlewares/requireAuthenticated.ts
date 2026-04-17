@@ -17,7 +17,7 @@ export function requireAuthenticated(req: Request, _res: Response, next: NextFun
 
     const accessToken = authorization.slice(7);
 
-    jwt.verify(accessToken, CONFIG.jwtSecret, (err, decoded) => {
+    jwt.verify(accessToken, CONFIG.jwtAccessSecret, (err, decoded) => {
         if (err) {
             if (err.name === "TokenExpiredError") {
                 return next(new UnauthorizedError("Access token has expired"));
