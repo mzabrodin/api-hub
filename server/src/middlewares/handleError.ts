@@ -10,7 +10,7 @@ export function handleError(
 ): void {
     if (err instanceof AppError) {
         res.status(err.statusCode).json({
-            status: "error",
+            success: false,
             message: err.message,
             ...(err instanceof ValidationError && {details: err.details}),
             ...(CONFIG.nodeEnv === "dev" && {stack: err.stack}),
@@ -21,7 +21,7 @@ export function handleError(
     console.error("Unexpected error: ", err);
 
     res.status(500).json({
-        status: "error",
+        success: false,
         message: "Something went wrong",
         ...(CONFIG.nodeEnv === "dev" && {stack: err.stack}),
     });
