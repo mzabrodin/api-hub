@@ -28,7 +28,7 @@ const CONFIG = {
     nodeEnv: getEnvironmentString("NODE_ENV", "dev") as NodeEnvironment,
     clientUrl: getEnvironmentString("CLIENT_URL"),
 
-    jwtSecret: getEnvironmentString("JWT_ACCESS_SECRET"),
+    jwtAccessSecret: getEnvironmentString("JWT_ACCESS_SECRET"),
     jwtAccessExpiresIn: getEnvironmentString("JWT_ACCESS_EXPIRES_IN", "15m"),
 
     jwtRefreshSecret: getEnvironmentString("JWT_REFRESH_SECRET"),
@@ -36,6 +36,8 @@ const CONFIG = {
 
     jwtVerifyEmailExpiresIn: getEnvironmentString("JWT_VERIFY_EMAIL_EXPIRES_IN", "24h"),
     jwtResetPasswordExpiresIn: getEnvironmentString("JWT_RESET_PASSWORD_EXPIRES_IN", "1h"),
+
+    jwtOneTimeSecret: getEnvironmentString("JWT_ONE_TIME_SECRET"),
 
     emailHost: getEnvironmentString("EMAIL_HOST"),
     emailPort: getEnvironmentNumber("EMAIL_PORT", "587"),

@@ -18,13 +18,13 @@ type TokenPurpose = "verify-email" | "reset-password";
 type SafeUser = Omit<User, "passwordHash" | "verificationToken" | "passwordResetToken" | "refreshToken">;
 
 function signOneTimeToken(userId: string, purpose: TokenPurpose, expiresIn: string): string {
-    return jwt.sign({userId, purpose}, CONFIG.jwtSecret, {expiresIn} as SignOptions);
+    return jwt.sign({userId, purpose}, CONFIG.jwtOneTimeSecret, {expiresIn} as SignOptions);
 }
 
 function verifyOneTimeToken(token: string, expectedPurpose: TokenPurpose): string {
     let decoded: { userId: string; purpose: string };
     try {
-        decoded = jwt.verify(token, CONFIG.jwtSecret) as typeof decoded;
+        decoded = jwt.verify(token, CONFIG.jwtOneTimeSecret) as typeof decoded;
     } catch {
         throw new BadRequestError("Invalid or expired token");
     }
@@ -38,7 +38,7 @@ function verifyOneTimeToken(token: string, expectedPurpose: TokenPurpose): strin
 
 function issueTokens(user: { id: string; email: string; role: UserRole }) {
     const payload = {id: user.id, email: user.email, role: user.role};
-    const accessToken = jwt.sign(payload, CONFIG.jwtSecret, {
+    const accessToken = jwt.sign(payload, CONFIG.jwtAccessSecret, {
         expiresIn: CONFIG.jwtAccessExpiresIn,
     } as SignOptions);
 
@@ -61,13 +61,12 @@ export async function register(data: RegisterRequest) {
     }
 
     const passwordHash = await argon2.hash(data.password);
+    const userId = crypto.randomUUID();
+    const verificationToken = signOneTimeToken(userId, "verify-email", CONFIG.jwtVerifyEmailExpiresIn);
 
     const user = await prisma.user.create({
-        data: {email: data.email, username: data.username, passwordHash},
+        data: {id: userId, email: data.email, username: data.username, passwordHash, verificationToken},
     });
-
-    const verificationToken = signOneTimeToken(user.id, "verify-email", CONFIG.jwtVerifyEmailExpiresIn);
-    await prisma.user.update({where: {id: user.id}, data: {verificationToken}});
 
     await sendVerificationEmail(user.email, user.username, verificationToken);
     return safeUser(user);
@@ -175,6 +174,7 @@ export async function resetPassword(token: string, password: string) {
         data: {
             passwordHash: await argon2.hash(password),
             passwordResetToken: null,
+            refreshToken: null,
         },
     });
 }
@@ -192,6 +192,6 @@ export async function changePassword(userId: string, data: ChangePasswordRequest
 
     await prisma.user.update({
         where: {id: userId},
-        data: {passwordHash: await argon2.hash(data.newPassword)},
+        data: {passwordHash: await argon2.hash(data.newPassword), refreshToken: null},
     });
 }
