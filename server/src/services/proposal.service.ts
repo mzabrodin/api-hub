@@ -1,4 +1,5 @@
 import prisma from "../prisma/client.js";
+import {ProposalStatus} from "../prisma/generated/enums.js";
 import {ForbiddenError, ResourceNotFoundError} from "../utils/errors/AppError.js";
 import {sendProposalApprovedEmail, sendProposalRejectedEmail} from "./email.service.js";
 import type {CreateProposalRequest, UpdateProposalRequest, ReviewProposalRequest, ProposalQueryRequest} from "../schemas/proposal.schemas.js";
@@ -78,7 +79,7 @@ export async function update(id: string, userId: string, data: UpdateProposalReq
         throw new ForbiddenError("Access denied");
     }
 
-    if (proposal.status !== "PENDING") {
+    if (proposal.status !== ProposalStatus.PENDING) {
         throw new ForbiddenError("Only pending proposals can be edited");
     }
 
@@ -95,7 +96,7 @@ export async function remove(id: string, userId: string) {
         throw new ForbiddenError("Access denied");
     }
 
-    if (proposal.status !== "PENDING") {
+    if (proposal.status !== ProposalStatus.PENDING) {
         throw new ForbiddenError("Only pending proposals can be deleted");
     }
 
@@ -112,7 +113,7 @@ export async function review(id: string, data: ReviewProposalRequest) {
         throw new ResourceNotFoundError("Proposal not found");
     }
 
-    if (proposal.status !== "PENDING") {
+    if (proposal.status !== ProposalStatus.PENDING) {
         throw new ForbiddenError("Only pending proposals can be reviewed");
     }
 
