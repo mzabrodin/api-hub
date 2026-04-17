@@ -5,11 +5,9 @@ const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$
 const usernameRegex = /^[a-zA-Z0-9_]+$/;
 
 export function processBoolean(input: unknown): boolean | undefined {
-    if (input === undefined) {
-        return undefined;
-    }
-
-    return input === "true";
+    if (input === "true") return true;
+    if (input === "false") return false;
+    return undefined;
 }
 
 export const UserRole = z.enum(["ADMIN", "USER"], {error: "Role must be one of ADMIN, USER"});
