@@ -3,7 +3,7 @@ import {catchAsync} from "../utils/errors/catchAsync.js";
 import * as UserService from "../services/user.service.js";
 import {sendSuccess} from "../utils/response.js";
 import type IdParam from "../types/idParam.js";
-import type {UpdateProfileRequest} from "../schemas/user.schemas.js";
+import type {UpdateProfileRequest, UpdateRoleRequest} from "../schemas/user.schemas.js";
 
 export const getAll = catchAsync(async (_req: Request, res: Response) => {
     const users = await UserService.getAll();
@@ -27,5 +27,10 @@ export const getProposals = catchAsync(async (req: Request<IdParam>, res: Respon
 
 export const updateMe = catchAsync(async (req: Request<{}, {}, UpdateProfileRequest>, res: Response) => {
     const user = await UserService.updateProfile(req.user!.id, req.body);
+    sendSuccess(res, {user});
+});
+
+export const updateRole = catchAsync(async (req: Request<IdParam, {}, UpdateRoleRequest>, res: Response) => {
+    const user = await UserService.updateRole(req.params.id, req.body);
     sendSuccess(res, {user});
 });
