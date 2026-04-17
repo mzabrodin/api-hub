@@ -123,27 +123,31 @@ export async function review(id: string, data: ReviewProposalRequest) {
         throw new InvalidActionError("Only pending proposals can be reviewed");
     }
 
-    const updated = await prisma.proposal.update({
-        where: {id},
-        data: {status: data.status, adminNote: data.adminNote ?? null},
-    });
-
-    let api = null;
-    if (data.status === ProposalStatus.ACCEPTED) {
-        api = await prisma.api.create({
-            data: {
-                name: proposal.name,
-                description: proposal.description,
-                url: proposal.url,
-                categoryId: proposal.categoryId,
-                isHttps: proposal.isHttps,
-                corsStatus: proposal.corsStatus,
-                isFree: proposal.isFree,
-                authType: proposal.authType,
-            },
-            include: {category: {select: {id: true, name: true}}},
+    const {updated, api} = await prisma.$transaction(async (tx) => {
+        const updated = await tx.proposal.update({
+            where: {id},
+            data: {status: data.status, adminNote: data.adminNote ?? null},
         });
-    }
+
+        let api = null;
+        if (data.status === ProposalStatus.ACCEPTED) {
+            api = await tx.api.create({
+                data: {
+                    name: proposal.name,
+                    description: proposal.description,
+                    url: proposal.url,
+                    categoryId: proposal.categoryId,
+                    isHttps: proposal.isHttps,
+                    corsStatus: proposal.corsStatus,
+                    isFree: proposal.isFree,
+                    authType: proposal.authType,
+                },
+                include: {category: {select: {id: true, name: true}}},
+            });
+        }
+
+        return {updated, api};
+    });
 
     try {
         if (data.status === ProposalStatus.ACCEPTED) {
