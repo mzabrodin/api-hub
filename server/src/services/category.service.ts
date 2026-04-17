@@ -1,5 +1,6 @@
 import prisma from "../prisma/client.js";
-import {ResourceAlreadyExistsError, ResourceNotFoundError} from "../utils/errors/AppError.js";
+import {Prisma} from "../prisma/generated/client.js";
+import {InvalidActionError, ResourceAlreadyExistsError, ResourceNotFoundError} from "../utils/errors/AppError.js";
 import type {CreateCategoryRequest, UpdateCategoryRequest} from "../schemas/category.schemas.js";
 
 export async function getAll() {
@@ -46,5 +47,12 @@ export async function remove(id: string) {
         throw new ResourceNotFoundError("Category not found");
     }
 
-    await prisma.category.delete({where: {id}});
+    try {
+        await prisma.category.delete({where: {id}});
+    } catch (e) {
+        if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2003") {
+            throw new InvalidActionError("Cannot delete a category that has APIs assigned to it");
+        }
+        throw e;
+    }
 }
