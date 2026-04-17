@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import helmet from "helmet";
 import {Request, Response} from "express";
 import handleError from "./middlewares/handleError.js";
 import routeNotFound from "./middlewares/routeNotFound.js";
@@ -8,6 +9,7 @@ import routes from "./routes/index.js";
 
 const app = express();
 
+app.use(helmet());
 app.use(cors({origin: CONFIG.clientUrl}));
 app.use(express.json());
 
