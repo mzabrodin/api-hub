@@ -17,7 +17,7 @@ app.get("/", (_req: Request, res: Response) => {
     res.json({data: "Hello World!", timestamp: new Date().toISOString()});
 });
 
-app.use("/api", routes)
+app.use("/api", routes);
 
 app.use(routeNotFound);
 app.use(handleError);
