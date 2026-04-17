@@ -17,17 +17,15 @@ export function requireAuthenticated(req: Request, _res: Response, next: NextFun
 
     const accessToken = authorization.slice(7);
 
-    jwt.verify(accessToken, CONFIG.jwtAccessSecret, (err, decoded) => {
-        if (err) {
-            if (err.name === "TokenExpiredError") {
-                return next(new UnauthorizedError("Access token has expired"));
-            }
-            return next(new UnauthorizedError("Access token is invalid"));
-        }
-
-        req.user = decoded as JWT;
+    try {
+        req.user = jwt.verify(accessToken, CONFIG.jwtAccessSecret) as JWT;
         next();
-    });
+    } catch (err) {
+        if (err instanceof jwt.TokenExpiredError) {
+            return next(new UnauthorizedError("Access token has expired"));
+        }
+        return next(new UnauthorizedError("Access token is invalid"));
+    }
 }
 
 export default requireAuthenticated;
