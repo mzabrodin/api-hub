@@ -1,6 +1,6 @@
 import prisma from "../prisma/client.js";
 import {ResourceNotFoundError} from "../utils/errors/AppError.js";
-import type {UpdateProfileRequest} from "../schemas/user.schemas.js";
+import type {UpdateProfileRequest, UpdateRoleRequest} from "../schemas/user.schemas.js";
 
 export async function getAll() {
     return prisma.user.findMany({
@@ -43,6 +43,19 @@ export async function updateProfile(userId: string, data: UpdateProfileRequest) 
     return prisma.user.update({
         where: {id: userId},
         data,
+        select: {id: true, email: true, username: true, role: true, isEmailVerified: true, createdAt: true},
+    });
+}
+
+export async function updateRole(userId: string, data: UpdateRoleRequest) {
+    const user = await prisma.user.findUnique({where: {id: userId}});
+    if (!user) {
+        throw new ResourceNotFoundError("User not found");
+    }
+
+    return prisma.user.update({
+        where: {id: userId},
+        data: {role: data.role},
         select: {id: true, email: true, username: true, role: true, isEmailVerified: true, createdAt: true},
     });
 }
