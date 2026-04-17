@@ -43,6 +43,6 @@ export const remove = catchAsync(async (req: Request<IdParam>, res: Response) =>
 });
 
 export const review = catchAsync(async (req: Request<IdParam, {}, ReviewProposalRequest>, res: Response) => {
-    const proposal = await ProposalService.review(req.params.id, req.body);
-    sendSuccess(res, {proposal});
+    const {proposal, api} = await ProposalService.review(req.params.id, req.body);
+    sendSuccess(res, {proposal, ...(api && {api})});
 });
