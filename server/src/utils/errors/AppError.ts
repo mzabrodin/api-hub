@@ -26,7 +26,7 @@ export class InvalidActionError extends AppError {
 
 export class ResourceAlreadyExistsError extends AppError {
     constructor(message: string = "Resource Already Exists") {
-        super(message, 400);
+        super(message, 409);
     }
 }
 
