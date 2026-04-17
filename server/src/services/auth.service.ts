@@ -1,5 +1,6 @@
 import argon2 from "argon2";
-import jwt, {SignOptions} from "jsonwebtoken";
+import jwt from "jsonwebtoken";
+import type {SignOptions} from "jsonwebtoken";
 import CONFIG from "../config.js";
 import type JWT from "../types/jwt.js";
 import type {RegisterRequest, LoginRequest} from "../schemas/auth.schemas.js";
@@ -7,6 +8,7 @@ import type {ChangePasswordRequest} from "../schemas/user.schemas.js";
 import {sendVerificationEmail, sendPasswordResetEmail} from "./email.service.js";
 import {
     BadRequestError,
+    InternalServerError,
     ResourceAlreadyExistsError,
     ResourceNotFoundError,
     UnauthorizedError,
@@ -25,7 +27,10 @@ function verifyOneTimeToken(token: string, expectedPurpose: TokenPurpose): strin
     let decoded: { userId: string; purpose: string };
     try {
         decoded = jwt.verify(token, CONFIG.jwtOneTimeSecret) as typeof decoded;
-    } catch {
+    } catch (err) {
+        if (err instanceof jwt.TokenExpiredError) {
+            throw err;
+        }
         throw new BadRequestError("Invalid or expired token");
     }
 
@@ -68,12 +73,33 @@ export async function register(data: RegisterRequest) {
         data: {id: userId, email: data.email, username: data.username, passwordHash, verificationToken},
     });
 
-    await sendVerificationEmail(user.email, user.username, verificationToken);
+    try {
+        await sendVerificationEmail(user.email, user.username, verificationToken);
+    } catch {
+        await prisma.user.delete({where: {id: user.id}});
+        throw new InternalServerError("Failed to send verification email. Please try again.");
+    }
+
     return safeUser(user);
 }
 
 export async function verifyEmail(token: string) {
-    const userId = verifyOneTimeToken(token, "verify-email");
+    let userId: string;
+    try {
+        userId = verifyOneTimeToken(token, "verify-email");
+    } catch (err) {
+        if (err instanceof jwt.TokenExpiredError) {
+            const decoded = jwt.decode(token) as { userId?: string; purpose?: string } | null;
+            if (decoded?.userId && decoded.purpose === "verify-email") {
+                const user = await prisma.user.findUnique({where: {id: decoded.userId}});
+                if (user && !user.isEmailVerified) {
+                    await prisma.user.delete({where: {id: decoded.userId}});
+                }
+            }
+            throw new BadRequestError("Verification token has expired. Please register again");
+        }
+        throw err;
+    }
 
     const user = await prisma.user.findUnique({where: {id: userId}});
     if (!user || user.verificationToken !== token) {
