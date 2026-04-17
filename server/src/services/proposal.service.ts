@@ -1,8 +1,13 @@
 import prisma from "../prisma/client.js";
 import {ProposalStatus} from "../prisma/generated/enums.js";
-import {ForbiddenError, ResourceNotFoundError} from "../utils/errors/AppError.js";
+import {ForbiddenError, InvalidActionError, ResourceNotFoundError} from "../utils/errors/AppError.js";
 import {sendProposalApprovedEmail, sendProposalRejectedEmail} from "./email.service.js";
-import type {CreateProposalRequest, UpdateProposalRequest, ReviewProposalRequest, ProposalQueryRequest} from "../schemas/proposal.schemas.js";
+import type {
+    CreateProposalRequest,
+    UpdateProposalRequest,
+    ReviewProposalRequest,
+    ProposalQueryRequest
+} from "../schemas/proposal.schemas.js";
 
 export async function getAll(query: ProposalQueryRequest) {
     const {page, limit, status} = query;
@@ -36,6 +41,7 @@ export async function getMine(userId: string, query: ProposalQueryRequest) {
     const [proposals, total] = await Promise.all([
         prisma.proposal.findMany({
             where,
+            include: {user: {select: {id: true, username: true, email: true}}},
             orderBy: {createdAt: "desc"},
             skip: (page - 1) * limit,
             take: limit,
@@ -80,7 +86,7 @@ export async function update(id: string, userId: string, data: UpdateProposalReq
     }
 
     if (proposal.status !== ProposalStatus.PENDING) {
-        throw new ForbiddenError("Only pending proposals can be edited");
+        throw new InvalidActionError("Only pending proposals can be edited");
     }
 
     return prisma.proposal.update({where: {id}, data});
@@ -97,7 +103,7 @@ export async function remove(id: string, userId: string) {
     }
 
     if (proposal.status !== ProposalStatus.PENDING) {
-        throw new ForbiddenError("Only pending proposals can be deleted");
+        throw new InvalidActionError("Only pending proposals can be deleted");
     }
 
     await prisma.proposal.delete({where: {id}});
@@ -114,7 +120,7 @@ export async function review(id: string, data: ReviewProposalRequest) {
     }
 
     if (proposal.status !== ProposalStatus.PENDING) {
-        throw new ForbiddenError("Only pending proposals can be reviewed");
+        throw new InvalidActionError("Only pending proposals can be reviewed");
     }
 
     const updated = await prisma.proposal.update({
@@ -122,11 +128,32 @@ export async function review(id: string, data: ReviewProposalRequest) {
         data: {status: data.status, adminNote: data.adminNote ?? null},
     });
 
-    if (data.status === "ACCEPTED") {
-        await sendProposalApprovedEmail(proposal.user.email, proposal.user.username, proposal.name);
-    } else {
-        await sendProposalRejectedEmail(proposal.user.email, proposal.user.username, proposal.name, data.adminNote!);
+    let api = null;
+    if (data.status === ProposalStatus.ACCEPTED) {
+        api = await prisma.api.create({
+            data: {
+                name: proposal.name,
+                description: proposal.description,
+                url: proposal.url,
+                categoryId: proposal.categoryId,
+                isHttps: proposal.isHttps,
+                corsStatus: proposal.corsStatus,
+                isFree: proposal.isFree,
+                authType: proposal.authType,
+            },
+            include: {category: {select: {id: true, name: true}}},
+        });
     }
 
-    return updated;
+    try {
+        if (data.status === ProposalStatus.ACCEPTED) {
+            await sendProposalApprovedEmail(proposal.user.email, proposal.user.username, proposal.name);
+        } else {
+            await sendProposalRejectedEmail(proposal.user.email, proposal.user.username, proposal.name, data.adminNote!);
+        }
+    } catch {
+        console.error(`Failed to send proposal review email to ${proposal.user.email}`);
+    }
+
+    return {proposal: updated, api};
 }
