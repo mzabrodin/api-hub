@@ -1,6 +1,15 @@
 import nodemailer from "nodemailer";
 import CONFIG from "../config.js";
 
+// https://stackoverflow.com/questions/24816/escaping-html-strings-with-jquery
+function escapeHtml(str: string): string {
+    return str
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+}
+
 const transporter = nodemailer.createTransport({
     host: CONFIG.emailHost,
     port: CONFIG.emailPort,
@@ -31,7 +40,7 @@ export async function sendVerificationEmail(to: string, username: string, token:
         to,
         subject: "Confirm your email - API Hub",
         html: buildHtmlContent(`
-            <p>Hi, <strong>${username}</strong>,</p>
+            <p>Hi, <strong>${escapeHtml(username)}</strong>,</p>
             <p>Thanks for registering. Click the link below to confirm your email address:</p>
             <p><a href="${link}">${link}</a></p>
             <p>The link expires in 24 hours. If you did not create an account, ignore this email.</p>
@@ -47,7 +56,7 @@ export async function sendPasswordResetEmail(to: string, username: string, token
         to,
         subject: "Reset your password - API Hub",
         html: buildHtmlContent(`
-            <p>Hi, <strong>${username}</strong>,</p>
+            <p>Hi, <strong>${escapeHtml(username)}</strong>,</p>
             <p>We received a request to reset your password. Click the link below to choose a new one:</p>
             <p><a href="${link}">${link}</a></p>
             <p>The link expires in 1 hour. If you did not request a password reset, ignore this email.</p>
@@ -61,8 +70,8 @@ export async function sendProposalApprovedEmail(to: string, username: string, pr
         to,
         subject: "Your proposal was approved - API Hub",
         html: buildHtmlContent(`
-            <p>Hi, <strong>${username}</strong>,</p>
-            <p>Great news! Your API proposal <strong>${proposalName}</strong> has been reviewed and approved.</p>
+            <p>Hi, <strong>${escapeHtml(username)}</strong>,</p>
+            <p>Great news! Your API proposal <strong>${escapeHtml(proposalName)}</strong> has been reviewed and approved.</p>
         `),
     });
 }
@@ -78,9 +87,9 @@ export async function sendProposalRejectedEmail(
         to,
         subject: "Your proposal was not approved - API Hub",
         html: buildHtmlContent(`
-            <p>Hi, <strong>${username}</strong>,</p>
-            <p>Your API proposal <strong>${proposalName}</strong> has been reviewed and was not approved.</p>
-            <p><strong>Reason:</strong> ${adminNote}</p>
+            <p>Hi, <strong>${escapeHtml(username)}</strong>,</p>
+            <p>Your API proposal <strong>${escapeHtml(proposalName)}</strong> has been reviewed and was not approved.</p>
+            <p><strong>Reason:</strong> ${escapeHtml(adminNote)}</p>
             <p>You are welcome to submit a revised proposal at any time.</p>
         `),
     });
