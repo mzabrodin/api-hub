@@ -24,3 +24,6 @@ dist-ssr
 *.sw?
 
 .idea/**
+
+.env
+!.env.example
