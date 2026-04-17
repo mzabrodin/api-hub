@@ -1,48 +1,42 @@
 import "dotenv/config";
+import {z} from "zod";
 
-function getEnvironmentString(name: string, defaultValue?: string): string {
-    const value = process.env[name] ?? defaultValue;
+const envSchema = z.object({
+    PORT: z.coerce.number().default(8080),
+    NODE_ENV: z.enum(["dev", "production", "test"]).default("dev"),
+    CLIENT_URL: z.string().min(1),
+    DATABASE_URL: z.string().min(1),
+    JWT_ACCESS_SECRET: z.string().min(1),
+    JWT_ACCESS_EXPIRES_IN: z.string().default("15m"),
+    JWT_REFRESH_SECRET: z.string().min(1),
+    JWT_REFRESH_EXPIRES_IN: z.string().default("7d"),
+    JWT_VERIFY_EMAIL_EXPIRES_IN: z.string().default("24h"),
+    JWT_RESET_PASSWORD_EXPIRES_IN: z.string().default("1h"),
+    JWT_ONE_TIME_SECRET: z.string().min(1),
+    EMAIL_HOST: z.string().min(1),
+    EMAIL_PORT: z.coerce.number().default(587),
+    EMAIL_USER: z.string().min(1),
+    EMAIL_PASSWORD: z.string().min(1),
+});
 
-    if (value === undefined || value.trim() === "") {
-        throw new Error(`Environment variable ${name} is required and cannot be empty`);
-    }
-
-    return value;
-}
-
-function getEnvironmentNumber(name: string, defaultValue?: string): number {
-    const stringValue = getEnvironmentString(name, defaultValue);
-    const parsedValue = parseInt(stringValue, 10);
-
-    if (Number.isNaN(parsedValue)) {
-        throw new Error(`Environment variable ${name} must be a valid number. Got: ${stringValue}`);
-    }
-
-    return parsedValue;
-}
-
-type NodeEnvironment = "dev" | "production" | "test";
+const env = envSchema.parse(process.env);
 
 const CONFIG = {
-    port: getEnvironmentNumber("PORT", "8080"),
-    nodeEnv: getEnvironmentString("NODE_ENV", "dev") as NodeEnvironment,
-    clientUrl: getEnvironmentString("CLIENT_URL"),
-
-    jwtAccessSecret: getEnvironmentString("JWT_ACCESS_SECRET"),
-    jwtAccessExpiresIn: getEnvironmentString("JWT_ACCESS_EXPIRES_IN", "15m"),
-
-    jwtRefreshSecret: getEnvironmentString("JWT_REFRESH_SECRET"),
-    jwtRefreshExpiresIn: getEnvironmentString("JWT_REFRESH_EXPIRES_IN", "7d"),
-
-    jwtVerifyEmailExpiresIn: getEnvironmentString("JWT_VERIFY_EMAIL_EXPIRES_IN", "24h"),
-    jwtResetPasswordExpiresIn: getEnvironmentString("JWT_RESET_PASSWORD_EXPIRES_IN", "1h"),
-
-    jwtOneTimeSecret: getEnvironmentString("JWT_ONE_TIME_SECRET"),
-
-    emailHost: getEnvironmentString("EMAIL_HOST"),
-    emailPort: getEnvironmentNumber("EMAIL_PORT", "587"),
-    emailUser: getEnvironmentString("EMAIL_USER"),
-    emailPass: getEnvironmentString("EMAIL_PASSWORD"),
+    port: env.PORT,
+    nodeEnv: env.NODE_ENV,
+    clientUrl: env.CLIENT_URL,
+    databaseUrl: env.DATABASE_URL,
+    jwtAccessSecret: env.JWT_ACCESS_SECRET,
+    jwtAccessExpiresIn: env.JWT_ACCESS_EXPIRES_IN,
+    jwtRefreshSecret: env.JWT_REFRESH_SECRET,
+    jwtRefreshExpiresIn: env.JWT_REFRESH_EXPIRES_IN,
+    jwtVerifyEmailExpiresIn: env.JWT_VERIFY_EMAIL_EXPIRES_IN,
+    jwtResetPasswordExpiresIn: env.JWT_RESET_PASSWORD_EXPIRES_IN,
+    jwtOneTimeSecret: env.JWT_ONE_TIME_SECRET,
+    emailHost: env.EMAIL_HOST,
+    emailPort: env.EMAIL_PORT,
+    emailUser: env.EMAIL_USER,
+    emailPass: env.EMAIL_PASSWORD,
 } as const;
 
 export default CONFIG;
