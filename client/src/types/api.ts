@@ -39,3 +39,43 @@ export interface RefreshResponse {
     accessToken: string;
     refreshToken: string;
 }
+
+export interface Category {
+    id: string;
+    name: string;
+    description?: string | null;
+}
+
+export interface Proposal {
+    id: string;
+    userId: string;
+    user?: { id: string; username: string; email: string };
+    name: string;
+    description: string;
+    url: string;
+    categoryId: string;
+    isHttps: boolean;
+    corsStatus: CorsStatus;
+    isFree: boolean;
+    authType: AuthType;
+    status: ProposalStatus;
+    adminNote?: string | null;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export interface Api {
+    id: string;
+    name: string;
+    description: string;
+    url: string;
+    categoryId: string;
+    category: { id: string; name: string };
+    isHttps: boolean;
+    corsStatus: CorsStatus;
+    isFree: boolean;
+    authType: AuthType;
+    isActive: boolean;
+    createdAt: string;
+    updatedAt: string;
+}
