@@ -31,8 +31,8 @@ export function AuthProvider({children}: { children: ReactNode }) {
             );
             setTokens(refreshData.data.accessToken, refreshData.data.refreshToken);
 
-            const {data: meData} = await api.get<{ success: true; data: User }>('/users/me');
-            setUser(meData.data);
+            const {data: meData} = await api.get<{ success: true; data: { user: User } }>('/users/me');
+            setUser(meData.data.user);
         } catch {
             clearTokens();
         } finally {
@@ -71,12 +71,12 @@ export function AuthProvider({children}: { children: ReactNode }) {
     }, []);
 
     const register = useCallback(async (email: string, password: string, username: string) => {
-        const {data} = await api.post<{ success: true; data: User }>('/auth/register', {
+        const {data} = await api.post<{ success: true; data: { user: User } }>('/auth/register', {
             email,
             password,
             username,
         });
-        return data.data;
+        return data.data.user;
     }, []);
 
     return (
