@@ -15,7 +15,7 @@ export function requestSchema(schema: {
 }
 
 export function validateSchema(schema: ZodObject<ZodRawShape>) {
-    return (req: Request, _res: Response, next: NextFunction): void => {
+    return function validationMiddleware(req: Request, _res: Response, next: NextFunction): void {
         const result = schema.safeParse({
             body: req.body,
             query: req.query,
@@ -32,11 +32,21 @@ export function validateSchema(schema: ZodObject<ZodRawShape>) {
         }
 
         if (result.data.query) {
-            req.query = result.data.query as typeof req.query;
+            Object.defineProperty(req, "query", {
+                value: result.data.query,
+                writable: true,
+                enumerable: true,
+                configurable: true,
+            });
         }
 
         if (result.data.params) {
-            req.params = result.data.params as typeof req.params;
+            Object.defineProperty(req, "params", {
+                value: result.data.params,
+                writable: true,
+                enumerable: true,
+                configurable: true,
+            });
         }
 
         next();
