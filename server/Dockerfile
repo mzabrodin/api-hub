@@ -11,7 +11,7 @@ RUN npm run db:generate
 RUN npm run build
 
 FROM builder AS migrate
-CMD ["npm", "run", "db:deploy"]
+CMD ["sh", "-c", "npm run db:deploy && npm run db:seed"]
 
 FROM node:24-alpine AS production
 WORKDIR /app
